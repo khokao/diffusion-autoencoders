@@ -1,4 +1,5 @@
 import torchvision
+from PIL import Image
 
 
 def get_dataset(name, split, transform=None):
@@ -26,3 +27,28 @@ def get_dataset(name, split, transform=None):
         raise NotImplementedError(f'Dataset name {name} if not supported.')
 
     return dataset
+
+
+def get_torchvision_transforms(cfg, mode):
+    assert mode in {'train', 'test'}
+    if mode == 'train':
+        transforms_cfg = cfg['train']['dataset']
+    else:
+        transforms_cfg = cfg['test']['dataset']
+
+    transforms = []
+    for t in transforms_cfg:
+        if hasattr(torchvision.transforms, t['name']):
+            transform_cls = getattr(torchvision.transforms, t['name'])(**t['params'])
+        else:
+            raise ValueError(f'Tranform {t["name"]} is not defined')
+        transforms.append(transform_cls)
+    transforms = torchvision.transforms.Compose(transforms)
+
+    return transforms
+
+
+def load_image_pillow(image_path):
+    with Image.open(image_path) as img:
+        image = img.convert('RGB')
+    return image
