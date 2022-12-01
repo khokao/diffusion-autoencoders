@@ -1,0 +1,54 @@
+[tool.poetry]
+name = "diffusion-autoencoders"
+version = "1.0.0"
+description = "Unofficial implementation of Diffusion Autoencoders"
+authors = ["Koki Hokao"]
+repository = "https://github.com/khokao/diffusion-autoencoders"
+packages = [{ include = "diffae" }]
+
+[tool.poetry.dependencies]
+python = ">=3.8,<3.9"
+loguru = "*"
+lpips = "*"
+matplotlib = "*"
+numpy = "*"
+opencv-contrib-python-headless = "4.2.0.34"
+pandas = "*"
+Pillow = "*"
+PyYAML = "*"
+scipy = "*"
+tensorboard = "*"
+tqdm = "*"
+
+# pytorch (for my old cuda environment)
+torch = "==1.12.1"
+torchvision = ">=0.5.0"
+
+[tool.poetry.dev-dependencies]
+flake8 = "*"
+flake8-isort = "*"
+flake8-quotes = "*"
+jupyter = "*"
+jupyterlab = "*"
+pep8-naming = "*"
+pyproject-flake8 = "*"
+seaborn = "*"
+
+[tool.poetry.scripts]
+diffae_train = "scripts.train:main"
+diffae_test = "scripts.test:main"
+clf_train = "scripts.clf_train:main"
+clf_test = "scripts.clf_test:main"
+
+[tool.isort]
+line_length = 120
+multi_line_output = 3
+
+[tool.flake8]
+max-line-length = 120
+exclude = "*/__init__.py"
+ignore = "W503,"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
