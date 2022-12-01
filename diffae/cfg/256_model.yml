@@ -1,0 +1,98 @@
+general:
+    device: cuda
+    seed: 42
+    output_root: ./output
+
+model:
+    network:
+        unet:
+            image_size: 256
+            in_channels: 3
+            out_channels: 3
+            model_channels: 128
+            emb_channels: 512
+            channel_multipliers: [1, 1, 2, 2, 4, 4]
+            num_resnet_blocks: 2
+            resnet_dropout: 0.1
+            attn_resolution: [16, ]
+            use_conv_resample: True
+            num_groups: 32
+        encoder:
+            image_size: 256
+            in_channels: 3
+            out_channels: 3
+            model_channels: 128
+            emb_channels: 512
+            channel_multipliers: [1, 1, 2, 2, 4, 4, 4]
+            num_resnet_blocks: 2
+            resnet_dropout: 0.1
+            attn_resolution: [16, ]
+            use_conv_resample: True
+            num_groups: 32
+    timesteps:
+        num: 1000
+        sample: uniform
+    beta:
+        schedule: linear
+        linear:
+            start: 0.0001
+            end: 0.02
+        cosine:
+            s: 0.008
+            max_beta: 0.999
+
+train:
+    epoch: 300
+    log_interval: 5000
+    dataset:
+        - name: RandomHorizontalFlip
+          params:
+              p: 0.5
+        - name: RandomVerticalFlip
+          params:
+              p: 0.5
+        - name: RandomAffine
+          params:
+              degrees: 15
+              translate: [0.1, 0.1]
+              scale: [0.9, 1.1]
+        - name: Resize
+          params:
+              size: [256, 256]
+        - name: ToTensor
+          params: {}
+        - name: Normalize
+          params:
+              mean: [0.5, 0.5, 0.5]
+              std: [0.5, 0.5, 0.5]
+    dataloader:
+        batch_size: 2
+        shuffle: True
+        num_workers: 4
+        pin_memory: False
+        drop_last: True
+    loss:
+        name: SimpleLoss
+    optimizer:
+        name: Adam
+        params:
+            lr: 0.0001
+            weight_decay: 0
+
+test:
+    dataset:
+        - name: Resize
+          params:
+              size: [256, 256]
+        - name: ToTensor
+          params: {}
+        - name: Normalize
+          params:
+              mean: [0.5, 0.5, 0.5]
+              std: [0.5, 0.5, 0.5]
+    dataloader:
+        batch_size: 2
+        shuffle: False
+        num_workers: 4
+        pin_memory: False
+        drop_last: False
