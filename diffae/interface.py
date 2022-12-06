@@ -74,7 +74,7 @@ class DiffusionAutoEncodersInterface:
         assert self.mode == 'train'
         logger.info('Initializing output directory...')
         output_root = Path(self.cfg['general']['output_root'])
-        output_dir = output_root / time.strftime('%Y%m%d%H%M%S') if args['expn'] is None else args['expn']
+        output_dir = output_root / time.strftime('%Y%m%d%H%M%S') if args['expn'] is None else output_root / args['expn']
         output_dir.mkdir(exist_ok=True, parents=True)
         return output_dir
 
