@@ -2,6 +2,7 @@ general:
     device: cuda
     seed: 42
     output_root: ./output
+    data_name:
 
 model:
     network:
@@ -42,23 +43,17 @@ model:
             max_beta: 0.999
 
 train:
-    epoch: 300
-    log_interval: 1000
+    epoch: 500
+    fp16: True
+    grad_accum_steps: 1
+    log_interval: 500
     dataset:
-        - name: RandomHorizontalFlip
-          params:
-              p: 0.5
-        - name: RandomVerticalFlip
-          params:
-              p: 0.5
-        - name: RandomAffine
-          params:
-              degrees: 15
-              translate: [0.1, 0.1]
-              scale: [0.9, 1.1]
         - name: Resize
           params:
               size: [128, 128]
+        - name: RandomHorizontalFlip
+          params:
+              p: 0.5
         - name: ToTensor
           params: {}
         - name: Normalize
@@ -69,7 +64,7 @@ train:
         batch_size: 16
         shuffle: True
         num_workers: 4
-        pin_memory: False
+        pin_memory: True
         drop_last: True
     loss:
         name: SimpleLoss
@@ -96,3 +91,24 @@ test:
         num_workers: 4
         pin_memory: False
         drop_last: False
+
+classifier:
+    num_class: 40
+    train:
+        epoch: 500
+        fp16: True
+        grad_accum_steps: 1
+        log_interval: 500
+        dataloader:
+            batch_size: 16
+            shuffle: True
+            num_workers: 1
+            pin_memory: False
+            drop_last: True
+        loss:
+            name: BCEWithLogitsLoss
+        optimizer:
+            name: Adam
+            params:
+                lr: 0.001
+                weight_decay: 0
