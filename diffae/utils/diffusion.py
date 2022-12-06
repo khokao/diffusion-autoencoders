@@ -84,7 +84,6 @@ def get_betas(cfg):
             shape = (num_timesteps, )
             dtype = torch.float32
     """
-    device = cfg['general']['device']
     num_timesteps = cfg['model']['timesteps']['num']
     schedule = cfg['model']['beta']['schedule']
 
@@ -107,5 +106,5 @@ def get_betas(cfg):
             betas.append(beta_t)
         betas = np.array(betas, dtype=np.float64)
 
-    betas = torch.from_numpy(betas).float().to(device)
+    betas = torch.from_numpy(betas).float()
     return betas
