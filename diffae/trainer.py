@@ -89,7 +89,7 @@ class Trainer:
 
             noise = torch.randn_like(x0, device=self.device)
             alpha_t = self.alphas_cumprod[t].view(-1, 1, 1, 1)
-            xt = torch.sqrt(alpha_t)*x0 + torch.sqrt(1.0 - alpha_t)*noise
+            xt = torch.sqrt(alpha_t) * x0 + torch.sqrt(1.0 - alpha_t) * noise
 
             outputs = self.model(x0, xt, t.float())
             loss = self.criterion(outputs, noise)

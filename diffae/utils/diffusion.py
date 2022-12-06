@@ -96,13 +96,13 @@ def get_betas(cfg):
         max_beta = cfg['model']['beta'][schedule]['max_beta']
 
         def function(t, num_timesteps=num_timesteps, s=s):
-            numer = (t/num_timesteps + s) * math.pi
+            numer = (t / num_timesteps + s) * math.pi
             denom = (1 + s) * 2
             return math.cos(numer / denom) ** 2
 
         betas = []
         for t in range(num_timesteps):
-            beta_t = min(1 - function(t + 1)/function(t), max_beta)
+            beta_t = min(1 - function(t + 1) / function(t), max_beta)
             betas.append(beta_t)
         betas = np.array(betas, dtype=np.float64)
 
