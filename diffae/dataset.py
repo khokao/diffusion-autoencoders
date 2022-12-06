@@ -1,6 +1,7 @@
 
 import csv
 import os
+import re
 
 import PIL
 import torch
@@ -99,22 +100,18 @@ class CelebAHQ(CelebA):
             self.filename = splits.index
         else:
             self.filename = [splits.index[i] for i in torch.squeeze(torch.nonzero(mask))]
-            self.filename = [id_map[f] for f in self.filename if f in id_map.keys()]
+        self.filename = [id_map[f] for f in self.filename if f in id_map.keys()]
 
+        self.attr = torch.zeros((len(self.filename), attr.data.shape[1]), dtype=torch.int64)
         if split_ is not None:
-            mask = torch.tensor([False] * attr.data.shape[0])
-            from tqdm import tqdm
-            for i, (celeba_id, celebahq_id) in tqdm(enumerate(id_map.items())):
-                assert f'{i}.jpg' == celebahq_id
-                if splits.data[splits.index.index(celeba_id)] == split_:
-                    mask[i] = True
-
-        self.attr = attr.data[mask]
+            for i, f in enumerate(self.filename):
+                num = int(re.sub(r'[^0-9]', '', f))
+                self.attr[i] = attr.data[num]
         # map from {-1, 1} to {0, 1}
         self.attr = torch.div(self.attr + 1, 2, rounding_mode='floor')
         self.attr_names = attr.header
 
-    def _check_integrity(self) -> bool:
+    def _check_integrity(self):
         for (_, md5, filename) in self.file_list:
             fpath = os.path.join(self.root, self.base_folder, filename)
             _, ext = os.path.splitext(filename)
@@ -126,7 +123,7 @@ class CelebAHQ(CelebA):
         # Should check a hash of the images
         return os.path.isdir(os.path.join(self.root, self.base_folder, 'CelebAMask-HQ/CelebA-HQ-img'))
 
-    def download(self) -> None:
+    def download(self):
         if self._check_integrity():
             print('Files already downloaded and verified')
             return
@@ -153,7 +150,7 @@ class CelebAHQ(CelebA):
 
         return id_map
 
-    def __getitem__(self, index: int):
+    def __getitem__(self, index):
         x = PIL.Image.open(
             os.path.join(self.root, self.base_folder, 'CelebAMask-HQ/CelebA-HQ-img', self.filename[index])
         )
