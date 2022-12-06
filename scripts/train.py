@@ -21,8 +21,8 @@ def main():
         'If you want to train other size, create config file named {iamge_size}_model.yml in diffae/cfg and modify it.'
     )
 
-    module = __import__('diffae', fromlist=['DiffusionAutoEncoderInterface'])
-    interface_cls = getattr(module, 'DiffusionAutoEncoderInterface')
+    module = __import__('diffae', fromlist=['DiffusionAutoEncodersInterface'])
+    interface_cls = getattr(module, 'DiffusionAutoEncodersInterface')
     interface = interface_cls(args, mode='train')
 
     interface.train()

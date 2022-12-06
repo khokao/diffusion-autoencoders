@@ -1,1 +1,1 @@
-from .interface import DiffusionAutoEncoderInterface
+from .interface import DiffusionAutoEncodersInterface

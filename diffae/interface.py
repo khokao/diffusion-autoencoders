@@ -14,7 +14,7 @@ from .trainer import Trainer
 from .utils import get_torchvision_unnormalize
 
 
-class DiffusionAutoEncoderInterface:
+class DiffusionAutoEncodersInterface:
     CFG_DIR = Path('./diffae/cfg')
 
     def __init__(self, args, mode):
