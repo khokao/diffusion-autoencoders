@@ -126,8 +126,10 @@ class ClassifierTrainer:
         self.optimizer = self.get_optimizer()
         self.criterion = self.get_criterion()
 
-        self.fp16 = cfg['train']['fp16']
-        self.grad_accum_steps = cfg['train']['grad_accum_steps']
+        self.fp16 = cfg['classifier']['train']['fp16']
+        self.grad_accum_steps = cfg['classifier']['train']['grad_accum_steps']
+
+        self.clip_grad_norm = cfg['classifier']['train']['clip_grad_norm']
 
     def get_criterion(self):
         criterion_cfg = self.cfg['classifier']['train']['loss']
@@ -173,6 +175,8 @@ class ClassifierTrainer:
         self.train_loss_meter.update(loss.item())
 
         if (self.iter + 1) % self.grad_accum_steps == 0:
+            if self.clip_grad_norm != 0:
+                torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.clip_grad_norm)
             self.scaler.step(self.optimizer)
             self.scaler.update()
             self.optimizer.zero_grad()

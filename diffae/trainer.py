@@ -47,6 +47,8 @@ class Trainer:
         self.fp16 = cfg['train']['fp16']
         self.grad_accum_steps = cfg['train']['grad_accum_steps']
 
+        self.clip_grad_norm = cfg['train']['clip_grad_norm']
+
         self.num_timesteps = cfg['model']['timesteps']['num']
         self.timestep_sampler = TimestepSampler(cfg)
 
@@ -99,6 +101,8 @@ class Trainer:
         self.train_loss_meter.update(loss.item())
 
         if (self.iter + 1) % self.grad_accum_steps == 0:
+            if self.clip_grad_norm != 0:
+                torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.clip_grad_norm)
             self.scaler.step(self.optimizer)
             self.scaler.update()
             self.optimizer.zero_grad()
