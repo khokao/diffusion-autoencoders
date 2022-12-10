@@ -72,7 +72,8 @@ class DiffusionAutoEncodersInterface:
         with cfg_path.open('r') as fp:
             cfg = yaml.safe_load(fp)
 
-        cfg['general']['data_name'] = args['data_name']
+        if self.mode == 'train':
+            cfg['general']['data_name'] = args['data_name']
         if cfg['general']['data_name'] == 'celeba':
             logger.info('For CerebA (not CelabA-HQ) dataset, D2C Crop is applied first.')
             cfg['train']['dataset'].insert(0, {'name': 'D2CCrop', 'params': {}})

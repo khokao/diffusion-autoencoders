@@ -47,7 +47,7 @@ class Sampler:
         self.num_timesteps = cfg['model']['timesteps']['num']
         self.betas = get_betas(cfg)
         self.alphas = 1 - self.betas
-        self.alphas_cumprod = self.alphas.cumprod(dim=0)
+        self.alphas_cumprod = self.alphas.cumprod(dim=0).to(self.device)
         self.alphas_cumprod_prev = torch.cat([torch.ones(1, device=self.device), self.alphas_cumprod[:-1]], dim=0)
         self.alphas_cumprod_next = torch.cat([self.alphas_cumprod[1:], torch.zeros(1, device=self.device)], dim=0)
 
