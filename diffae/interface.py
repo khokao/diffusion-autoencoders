@@ -8,7 +8,7 @@ from loguru import logger
 
 from .classifier import ClassifierTrainer, LinearClassifier, evaluate_classifier
 from .dataset import EmbeddingDataset, get_dataset, get_torchvision_transforms
-from .models.model import DiffusionAutoEncoder
+from .models.model import DiffusionAutoEncoders
 from .sampler import Sampler
 from .trainer import Trainer
 from .utils import get_torchvision_unnormalize
@@ -80,7 +80,7 @@ class DiffusionAutoEncodersInterface:
 
     def _init_model(self, ckpt_path=None):
         logger.info('Initializing Diffusion Autoencoders...')
-        model = DiffusionAutoEncoder(self.cfg)
+        model = DiffusionAutoEncoders(self.cfg)
         if ckpt_path is not None:
             logger.info('Loading Diff-AE checkpoint...')
             state = torch.load(ckpt_path)

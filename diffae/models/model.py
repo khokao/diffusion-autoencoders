@@ -4,7 +4,7 @@ from .encoder import SemanticEncoder
 from .unet import Unet
 
 
-class DiffusionAutoEncoder(nn.Module):
+class DiffusionAutoEncoders(nn.Module):
     def __init__(self, cfg):
         """
         Args:
