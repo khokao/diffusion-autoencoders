@@ -44,8 +44,8 @@ model:
 
 train:
     epoch: 500
-    fp16: True
-    grad_accum_steps: 1
+    fp16: False
+    grad_accum_steps: 2
     clip_grad_norm: 1.0
     log_interval: 500
     dataset:
@@ -97,8 +97,8 @@ classifier:
     num_class: 40
     train:
         epoch: 500
-        fp16: True
-        grad_accum_steps: 1
+        fp16: False
+        grad_accum_steps: 2
         clip_grad_norm: 0
         log_interval: 500
         dataloader:
