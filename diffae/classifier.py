@@ -211,7 +211,7 @@ class ClassifierTrainer:
                     self.train_loss_meter.latest,
                 )
             )
-            self.tblogger.add_scalar('train_loss', self.train_loss_meter.latest, self.iter + 1)
+            self.tblogger.add_scalar('clf_train_loss', self.train_loss_meter.latest, self.iter + 1)
             self.train_loss_meter.reset()
 
     def save_ckpt(self, name):

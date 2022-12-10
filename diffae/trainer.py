@@ -101,7 +101,7 @@ class Trainer:
         self.train_loss_meter.update(loss.item())
 
         if (self.iter + 1) % self.grad_accum_steps == 0:
-            if self.clip_grad_norm != 0:
+            if self.clip_grad_norm > 0:
                 torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.clip_grad_norm)
             self.scaler.step(self.optimizer)
             self.scaler.update()
