@@ -18,6 +18,17 @@ class DiffusionAutoEncodersInterface:
     CFG_DIR = Path('./diffae/cfg')
 
     def __init__(self, args, mode):
+        """Setting up config, output directory, model, and dataset.
+
+        Args:
+            args (dict): A dict of arguments with the following keys,
+                mode == 'train':
+                    data_name (str): Dataset name.
+                    size (int): Image size.
+                    expn (str): Experiment name.
+                mode in {'test', 'clf_train', 'clf_test', 'infer'}:
+                    output (str): Path to output directory.
+        """
         assert mode in {'train', 'test', 'clf_train', 'clf_test', 'infer'}
         self.mode = mode
         self.cfg = self._init_config(args)
@@ -50,6 +61,8 @@ class DiffusionAutoEncodersInterface:
         self._init_dataset()
 
     def _init_config(self, args):
+        """Setting up config dict.
+        """
         logger.info('Initializing config...')
         # Load config file.
         if self.mode == 'train':
@@ -71,6 +84,8 @@ class DiffusionAutoEncodersInterface:
         return cfg
 
     def _init_output_dir(self, args):
+        """Create output directory.
+        """
         assert self.mode == 'train'
         logger.info('Initializing output directory...')
         output_root = Path(self.cfg['general']['output_root'])
@@ -79,6 +94,8 @@ class DiffusionAutoEncodersInterface:
         return output_dir
 
     def _init_model(self, ckpt_path=None):
+        """Setting up DiffusionAutoEncoders module.
+        """
         logger.info('Initializing Diffusion Autoencoders...')
         model = DiffusionAutoEncoders(self.cfg)
         if ckpt_path is not None:
@@ -88,6 +105,8 @@ class DiffusionAutoEncodersInterface:
         return model
 
     def _init_clf_model(self, ckpt_path=None):
+        """Setting up LinearClassifier module.
+        """
         logger.info('Initializing classifier...')
         clf_model = LinearClassifier(self.cfg)
         if ckpt_path is not None:
@@ -97,6 +116,8 @@ class DiffusionAutoEncodersInterface:
         return clf_model
 
     def _init_dataset(self):
+        """Setting up transforms and dataset.
+        """
         assert self.mode in {'train', 'test', 'clf_train', 'clf_test', 'infer'}
         logger.info('Initializing dataset...')
 
@@ -118,6 +139,8 @@ class DiffusionAutoEncodersInterface:
             self.dataset = EmbeddingDataset(image_dataset, self.model.encoder, self.cfg)
 
     def train(self):
+        """DiffusionAutoEncoders training.
+        """
         assert self.mode == 'train'
 
         trainer = Trainer(self.model, self.cfg, self.output_dir, self.dataset)
@@ -125,6 +148,8 @@ class DiffusionAutoEncodersInterface:
 
     @torch.inference_mode()
     def test(self):
+        """DiffusionAutoEncoders evaluation.
+        """
         assert self.mode == 'test'
 
         logger.info('Evaluation start...')
@@ -133,12 +158,16 @@ class DiffusionAutoEncodersInterface:
             json.dump(result, fp, indent=4, sort_keys=True)
 
     def clf_train(self):
+        """LinearClassifier training.
+        """
         self.clf_model.set_norm_params(self.dataset)
         self.clf_trainer = ClassifierTrainer(self.clf_model, self.cfg, self.output_dir, self.dataset)
         self.clf_trainer.train()
 
     @torch.inference_mode()
     def clf_test(self):
+        """LinearClassifier evaluation.
+        """
         logger.info('Classifier evaluation start...')
         result = evaluate_classifier(self.clf_model, self.cfg, self.dataset)
         with (self.output_dir / 'clf_test.json').open as fp:
@@ -146,6 +175,20 @@ class DiffusionAutoEncodersInterface:
 
     @torch.inference_mode()
     def infer(self, image, style_emb=None):
+        """Autoencode a single image.
+
+        Args:
+            image: (PIL Image): A single PIL Image.
+            style_emb (torch.tensor, optional): A tensor of SemanticEncoder embedding.
+                You can perform conditional generation with arbitary embedding by passing this argument.
+
+        Returns:
+            result (dict): A result of autoencoding which has the following keys,
+                input (numpy.ndarray): A input image array.
+                output (numpy.ndarray): A output (autoencoded) image array.
+                x0_preds (List[numpy.ndarray]): A list of predicted x0 per timestep.
+                xt_preds (List[numpy.ndarray]): A list of predicted xt per timestep.
+        """
         assert self.mode == 'infer'
         image = self.transforms(image)
         result = self.sampler.sample_one_image(image, style_emb)

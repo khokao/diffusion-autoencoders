@@ -1,4 +1,14 @@
+"""
+The codes are modified.
 
+Link:
+    - [CelebAHQ]
+        - https://github.com/pytorch/vision/
+          blob/677fc939b21a8893f07db4c1f90482b648b6573f/torchvision/datasets/celeba.py#L15-L189
+    - [D2CCrop]
+        - https://github.com/phizaz/diffae/
+          blob/865f1926ce0d994e4a8dc2b5b250d57f519cadc1/dataset.py#L193-L217
+"""
 import csv
 import os
 import re
@@ -14,10 +24,14 @@ from torchvision.datasets.utils import check_integrity, download_file_from_googl
 
 
 class EmbeddingDataset(Dataset):
+    """SemanticEncoder feature dataset.
+    """
     def __init__(self, image_dataset, encoder, cfg):
         """
         Args:
-            image_dataset ()
+            image_dataset: Pytorch dataset class that returns the image tensor and target.
+            encoder: SemanticEncoder module.
+            cfg: A dict of config.
         """
         super().__init__()
         self.device = cfg['general']['device']
@@ -213,6 +227,10 @@ def get_dataset(name, split, transform=None):
 
 
 class D2CCrop:
+    """
+    Almost same code as
+        - https://github.com/phizaz/diffae/blob/865f1926ce0d994e4a8dc2b5b250d57f519cadc1/dataset.py#L193-L217
+    """
     def __init__(self):
         cx = 89
         cy = 121
