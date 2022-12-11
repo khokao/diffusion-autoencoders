@@ -16,35 +16,35 @@ import re
 import PIL
 import torch
 import torchvision
-import tqdm
 from PIL import Image
 from torch.utils.data import Dataset
 from torchvision.datasets import CelebA
 from torchvision.datasets.utils import check_integrity, download_file_from_google_drive, extract_archive, verify_str_arg
+from tqdm import tqdm
 
 
 class EmbeddingDataset(Dataset):
     """SemanticEncoder feature dataset.
     """
-    def __init__(self, image_dataset, encoder, cfg):
+    def __init__(self, image_loader, encoder, cfg):
         """
         Args:
-            image_dataset: Pytorch dataset class that returns the image tensor and target.
+            image_loader: Pytorch DataLoader class that returns the images tensor and targets.
             encoder: SemanticEncoder module.
             cfg: A dict of config.
         """
         super().__init__()
         self.device = cfg['general']['device']
-        self.style_embs, self.targets = self._extract_embedding(image_dataset, encoder)
+        self.style_embs, self.targets = self._extract_embedding(image_loader, encoder)
 
     @torch.inference_mode()
-    def _extract_embedding(self, image_dataset, encoder):
+    def _extract_embedding(self, image_loader, encoder):
         encoder.to(self.device)
         encoder.eval()
 
         style_embs = []
         targets = []
-        for batch in tqdm(image_dataset):
+        for batch in tqdm(image_loader, desc='Extracting features...'):
             image, target = batch
             image = image.to(self.device)
             style_emb = encoder(image)
@@ -56,12 +56,12 @@ class EmbeddingDataset(Dataset):
         return style_embs, targets
 
     def __len__(self):
-        return len(self.image_paths)
+        return self.style_embs.shape[0]
 
     def __getitem__(self, index):
         style_emb = self.style_embs[index]
         target = self.targets[index]
-        return style_emb, target.long()
+        return style_emb, target.float()
 
 
 class CelebAHQ(CelebA):
@@ -188,7 +188,7 @@ class CelebAHQ(CelebA):
         else:
             target = None
 
-        return x, target
+        return x, target.long
 
 
 def get_dataset(name, split, transform=None):

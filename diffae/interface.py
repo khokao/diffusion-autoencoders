@@ -5,6 +5,7 @@ from pathlib import Path
 import torch
 import yaml
 from loguru import logger
+from torch.utils.data import DataLoader
 
 from .classifier import ClassifierTrainer, LinearClassifier, evaluate_classifier
 from .dataset import EmbeddingDataset, get_dataset, get_torchvision_transforms
@@ -45,10 +46,10 @@ class DiffusionAutoEncodersInterface:
             log_path = self.output_dir / f'{self.mode}.txt'
             logger.add(log_path, mode='w')
 
-        model_ckpt_path = None if self.mode.endswith('train') else self.output_dir / 'ckpt/last_ckpt.pth'
+        model_ckpt_path = None if self.mode == 'train' else self.output_dir / 'ckpt/last_ckpt.pth'
         self.model = self._init_model(model_ckpt_path)
 
-        clf_ckpt_path = None if not self.mode.startswith('clf_') else self.output_dir / 'ckpt/clf_last_ckpt.pth'
+        clf_ckpt_path = None if self.mode != 'clf_test' else self.output_dir / 'ckpt/clf_last_ckpt.pth'
         self.clf_model = self._init_clf_model(clf_ckpt_path)
 
         if self.mode in {'test', 'infer'}:
@@ -134,10 +135,12 @@ class DiffusionAutoEncodersInterface:
             self.dataset = get_dataset(name=data_name, split=self.mode, transforms=self.transforms)
         elif self.mode == 'clf_train':
             image_dataset = get_dataset(name=data_name, split='train', transform=self.transforms)
-            self.dataset = EmbeddingDataset(image_dataset, self.model.encoder, self.cfg)
+            image_loader = DataLoader(image_dataset, **self.cfg['classifier']['train']['dataloader'])
+            self.dataset = EmbeddingDataset(image_loader, self.model.encoder, self.cfg)
         elif self.mode == 'clf_test':
             image_dataset = get_dataset(name=data_name, split='test', transform=self.transforms)
-            self.dataset = EmbeddingDataset(image_dataset, self.model.encoder, self.cfg)
+            image_loader = DataLoader(image_dataset, **self.cfg['classifier']['test']['dataloader'])
+            self.dataset = EmbeddingDataset(image_loader, self.model.encoder, self.cfg)
 
     def train(self):
         """DiffusionAutoEncoders training.
@@ -155,7 +158,7 @@ class DiffusionAutoEncodersInterface:
 
         logger.info('Evaluation start...')
         result = self.sampler.sample_testdata(self.dataset)
-        with (self.output_dir / 'test.json').open as fp:
+        with (self.output_dir / 'test.json').open('w') as fp:
             json.dump(result, fp, indent=4, sort_keys=True)
 
     def clf_train(self):
@@ -171,8 +174,8 @@ class DiffusionAutoEncodersInterface:
         """
         logger.info('Classifier evaluation start...')
         result = evaluate_classifier(self.clf_model, self.cfg, self.dataset)
-        with (self.output_dir / 'clf_test.json').open as fp:
-            json.dump(result, fp, indent=4, sort_keys=True)
+        with (self.output_dir / 'clf_test.json').open('w') as fp:
+            json.dump(result, fp, indent=4, sort_keys=False)
 
     @torch.inference_mode()
     def infer(self, image, style_emb=None):

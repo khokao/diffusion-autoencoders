@@ -27,7 +27,7 @@ def evaluate_classifier(clf_model, cfg, test_dataset):
         inputs, targets = batch
         inputs = inputs.to(device)
         with torch.no_grad():
-            outputs = clf_model(inputs)
+            outputs = clf_model(inputs).sigmoid()
         gt.append(targets.to('cpu').numpy())
         score.append(outputs.to('cpu').numpy())
     gt = np.concatenate(gt)
@@ -36,7 +36,7 @@ def evaluate_classifier(clf_model, cfg, test_dataset):
     accuracy_list = []
     auroc_list = []
     result = {}
-    for i in range(cfg['num_class']):
+    for i in range(cfg['classifier']['num_class']):
         accuracy = accuracy_score(gt[:, i], np.where(score[:, i] < 0.5, 0, 1))
         auroc = roc_auc_score(gt[:, i], score[:, i])
         accuracy_list.append(accuracy)
@@ -46,8 +46,8 @@ def evaluate_classifier(clf_model, cfg, test_dataset):
             'auroc': auroc,
         }
     result['macro_average'] = {
-        'accuracy': sum(accuracy_list) / cfg['num_class'],
-        'auroc': sum(auroc_list) / cfg['num_class'],
+        'accuracy': sum(accuracy_list) / cfg['classifier']['num_class'],
+        'auroc': sum(auroc_list) / cfg['classifier']['num_class'],
     }
 
     return result
