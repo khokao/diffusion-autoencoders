@@ -118,8 +118,8 @@ classifier:
                 weight_decay: 0
     test:
         dataloader:
-        batch_size: 32
-        shuffle: false
-        num_workers: 4
-        pin_memory: true
-        drop_last: false
+            batch_size: 32
+            shuffle: false
+            num_workers: 4
+            pin_memory: true
+            drop_last: false
