@@ -64,7 +64,7 @@ tests = ["pytest"]
 
 [[package]]
 name = "asttokens"
-version = "2.2.0"
+version = "2.2.1"
 description = "Annotate AST trees with source code positions"
 category = "dev"
 optional = false
@@ -343,7 +343,7 @@ woff = ["zopfli (>=0.1.4)", "brotlicffi (>=0.8.0)", "brotli (>=1.0.1)"]
 
 [[package]]
 name = "google-auth"
-version = "2.14.1"
+version = "2.15.0"
 description = "Google Authentication Library"
 category = "main"
 optional = false
@@ -559,6 +559,14 @@ MarkupSafe = ">=2.0"
 i18n = ["Babel (>=2.7)"]
 
 [[package]]
+name = "joblib"
+version = "1.2.0"
+description = "Lightweight pipelining with Python functions"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[[package]]
 name = "json5"
 version = "0.9.10"
 description = "A Python implementation of the JSON5 data format."
@@ -605,7 +613,7 @@ qtconsole = "*"
 
 [[package]]
 name = "jupyter-client"
-version = "7.4.7"
+version = "7.4.8"
 description = "Jupyter protocol implementation and client libraries"
 category = "dev"
 optional = false
@@ -690,7 +698,7 @@ test = ["coverage", "ipykernel", "pre-commit", "pytest-console-scripts", "pytest
 
 [[package]]
 name = "jupyterlab"
-version = "3.5.0"
+version = "3.5.1"
 description = "JupyterLab computational environment"
 category = "dev"
 optional = false
@@ -911,7 +919,7 @@ test = ["ipykernel", "ipython", "ipywidgets", "nbconvert (>=7.0.0)", "pytest-asy
 
 [[package]]
 name = "nbconvert"
-version = "7.2.5"
+version = "7.2.6"
 description = "Converting Jupyter Notebooks"
 category = "dev"
 optional = false
@@ -936,12 +944,12 @@ tinycss2 = "*"
 traitlets = ">=5.0"
 
 [package.extras]
-all = ["ipykernel", "ipython", "ipywidgets (>=7)", "myst-parser", "nbsphinx (>=0.2.12)", "pre-commit", "pyppeteer (>=1,<1.1)", "pyqtwebengine (>=5.15)", "pytest", "pytest-cov", "pytest-dependency", "sphinx-rtd-theme", "sphinx (==5.0.2)", "tornado (>=6.1)"]
-docs = ["ipython", "myst-parser", "nbsphinx (>=0.2.12)", "sphinx-rtd-theme", "sphinx (==5.0.2)"]
-qtpdf = ["pyqtwebengine (>=5.15)"]
+all = ["nbconvert"]
+docs = ["ipykernel", "ipython", "myst-parser", "nbsphinx (>=0.2.12)", "pydata-sphinx-theme", "sphinx (==5.0.2)"]
+qtpdf = ["nbconvert"]
 qtpng = ["pyqtwebengine (>=5.15)"]
 serve = ["tornado (>=6.1)"]
-test = ["ipykernel", "ipywidgets (>=7)", "pre-commit", "pyppeteer (>=1,<1.1)", "pytest", "pytest-cov", "pytest-dependency"]
+test = ["ipykernel", "ipywidgets (>=7)", "pre-commit", "pyppeteer (>=1,<1.1)", "pytest", "pytest-dependency"]
 webpdf = ["pyppeteer (>=1,<1.1)"]
 
 [[package]]
@@ -1034,17 +1042,6 @@ python-versions = ">=3.6"
 rsa = ["cryptography (>=3.0.0)"]
 signals = ["blinker (>=1.4.0)"]
 signedtoken = ["cryptography (>=3.0.0)", "pyjwt (>=2.0.0,<3)"]
-
-[[package]]
-name = "opencv-contrib-python-headless"
-version = "4.2.0.34"
-description = "Wrapper package for OpenCV python bindings."
-category = "main"
-optional = false
-python-versions = "*"
-
-[package.dependencies]
-numpy = ">=1.11.1"
 
 [[package]]
 name = "packaging"
@@ -1444,6 +1441,26 @@ python-versions = ">=3.6,<4"
 pyasn1 = ">=0.1.3"
 
 [[package]]
+name = "scikit-learn"
+version = "1.1.3"
+description = "A set of python modules for machine learning and data mining"
+category = "main"
+optional = false
+python-versions = ">=3.8"
+
+[package.dependencies]
+joblib = ">=1.0.0"
+numpy = ">=1.17.3"
+scipy = ">=1.3.2"
+threadpoolctl = ">=2.0.0"
+
+[package.extras]
+benchmark = ["matplotlib (>=3.1.2)", "pandas (>=1.0.5)", "memory-profiler (>=0.57.0)"]
+docs = ["matplotlib (>=3.1.2)", "scikit-image (>=0.16.2)", "pandas (>=1.0.5)", "seaborn (>=0.9.0)", "memory-profiler (>=0.57.0)", "sphinx (>=4.0.1)", "sphinx-gallery (>=0.7.0)", "numpydoc (>=1.2.0)", "Pillow (>=7.1.2)", "sphinx-prompt (>=1.3.0)", "sphinxext-opengraph (>=0.4.2)"]
+examples = ["matplotlib (>=3.1.2)", "scikit-image (>=0.16.2)", "pandas (>=1.0.5)", "seaborn (>=0.9.0)"]
+tests = ["matplotlib (>=3.1.2)", "scikit-image (>=0.16.2)", "pandas (>=1.0.5)", "pytest (>=5.0.1)", "pytest-cov (>=2.9.0)", "flake8 (>=3.8.2)", "black (>=22.3.0)", "mypy (>=0.961)", "pyamg (>=4.0.0)", "numpydoc (>=1.2.0)"]
+
+[[package]]
 name = "scipy"
 version = "1.9.3"
 description = "Fundamental algorithms for scientific computing in Python"
@@ -1586,7 +1603,7 @@ python-versions = "*"
 
 [[package]]
 name = "terminado"
-version = "0.17.0"
+version = "0.17.1"
 description = "Tornado websocket backend for the Xterm.js Javascript terminal emulator library."
 category = "dev"
 optional = false
@@ -1598,8 +1615,16 @@ pywinpty = {version = ">=1.1.0", markers = "os_name == \"nt\""}
 tornado = ">=6.1.0"
 
 [package.extras]
-docs = ["pydata-sphinx-theme", "sphinx"]
+docs = ["myst-parser", "pydata-sphinx-theme", "sphinx"]
 test = ["pre-commit", "pytest-timeout", "pytest (>=7.0)"]
+
+[[package]]
+name = "threadpoolctl"
+version = "3.1.0"
+description = "threadpoolctl"
+category = "main"
+optional = false
+python-versions = ">=3.6"
 
 [[package]]
 name = "tinycss2"
@@ -1788,7 +1813,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "flake8 (<5)", "pytest-co
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8,<3.9"
-content-hash = "74ac4fcfff8f43973015bf27014d94164d819a36330fc18c30d07f6b28eb5c7e"
+content-hash = "54e3e59f41e0739fa92b3ae936fc38748b23bde4eb4f1dc5f9030e741ac9f8e6"
 
 [metadata.files]
 absl-py = []
@@ -1896,6 +1921,7 @@ jinja2 = [
     {file = "Jinja2-3.1.2-py3-none-any.whl", hash = "sha256:6088930bfe239f0e6710546ab9c19c9ef35e29792895fed6e6e31a023a182a61"},
     {file = "Jinja2-3.1.2.tar.gz", hash = "sha256:31351a702a408a9e7595a8fc6150fc3f43bb6bf7e319770cbc0db9df9437e852"},
 ]
+joblib = []
 json5 = []
 jsonschema = []
 jupyter = [
@@ -1976,28 +2002,6 @@ notebook = []
 notebook-shim = []
 numpy = []
 oauthlib = []
-opencv-contrib-python-headless = [
-    {file = "opencv_contrib_python_headless-4.2.0.34-cp35-cp35m-macosx_10_9_x86_64.whl", hash = "sha256:780c8a33f7c2828670b7e91f9228a2f46dbc00e8e2ed1d5306f1b8ba4b6e15b0"},
-    {file = "opencv_contrib_python_headless-4.2.0.34-cp35-cp35m-manylinux1_i686.whl", hash = "sha256:119490c6ac8addb4c5c6210b297f728d9bbacf683a36350503819d5ad16f5b73"},
-    {file = "opencv_contrib_python_headless-4.2.0.34-cp35-cp35m-manylinux1_x86_64.whl", hash = "sha256:bec872e5cf821609d155344f25c27aed321d8d1e27de9b5a805d4123d8adfed7"},
-    {file = "opencv_contrib_python_headless-4.2.0.34-cp35-cp35m-win32.whl", hash = "sha256:1f78bb3bef2bf48264babea0af5f866e050181b5f228573d615371cb9230327f"},
-    {file = "opencv_contrib_python_headless-4.2.0.34-cp35-cp35m-win_amd64.whl", hash = "sha256:77148d3007cd9330fe10e6f3f2071d2d1def02f5b6a3a05512c3a473186b89ac"},
-    {file = "opencv_contrib_python_headless-4.2.0.34-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:fb22d56f358f3393b8fdea7c3bcc184de69ac6b295040dd2f94104cf047b79be"},
-    {file = "opencv_contrib_python_headless-4.2.0.34-cp36-cp36m-manylinux1_i686.whl", hash = "sha256:cceeebf4e18f86054a127af965cec9753407949feda7675b1cc57d385b9f4d06"},
-    {file = "opencv_contrib_python_headless-4.2.0.34-cp36-cp36m-manylinux1_x86_64.whl", hash = "sha256:210d700285f597b93fe0fb17a951f5a74b70e9e0c0c7b1477449a0f91ad7be48"},
-    {file = "opencv_contrib_python_headless-4.2.0.34-cp36-cp36m-win32.whl", hash = "sha256:de13e2f01a3c603e7364f3f75f009f95ebe18c0e3d7f89e2f248bc3273d8fe20"},
-    {file = "opencv_contrib_python_headless-4.2.0.34-cp36-cp36m-win_amd64.whl", hash = "sha256:4335768a5b41e1b43296d11f6bf6fd0ccaf8b9c3e0c517b5f7be2dda158c4f8a"},
-    {file = "opencv_contrib_python_headless-4.2.0.34-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:036649086e7f5e67391620f2471a7ed5c4d820d32af17c90526ea2921eb7404c"},
-    {file = "opencv_contrib_python_headless-4.2.0.34-cp37-cp37m-manylinux1_i686.whl", hash = "sha256:01a57b2d8a850796fc8d28be345be8c5898228670dd10f4e1bf9f0b6a3651107"},
-    {file = "opencv_contrib_python_headless-4.2.0.34-cp37-cp37m-manylinux1_x86_64.whl", hash = "sha256:363a4c53680f41244a21af44212d1ece248428c8906b71a2f8eed213b5504703"},
-    {file = "opencv_contrib_python_headless-4.2.0.34-cp37-cp37m-win32.whl", hash = "sha256:b5038ce8d7e28e37df9cc293d5b9159201093cbac8717b6de2c5369f106384a0"},
-    {file = "opencv_contrib_python_headless-4.2.0.34-cp37-cp37m-win_amd64.whl", hash = "sha256:b3597cf23e3a0e1566cc2ca9d84ede7b15edaf85a516a470a39783aa0855832f"},
-    {file = "opencv_contrib_python_headless-4.2.0.34-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:d1f267bf724e917af57c4dd27baf8d20a6f95d5d3aad334044737368f77a55e7"},
-    {file = "opencv_contrib_python_headless-4.2.0.34-cp38-cp38-manylinux1_i686.whl", hash = "sha256:b59d0d850ced836ea3ac940ce72bf9ee0225153f4632d5c581e0c97a812c7695"},
-    {file = "opencv_contrib_python_headless-4.2.0.34-cp38-cp38-manylinux1_x86_64.whl", hash = "sha256:e738aa518a4ad5cbcd9b6157d49a5d463d594fab2964123dd37a2fb2d7fd9dcd"},
-    {file = "opencv_contrib_python_headless-4.2.0.34-cp38-cp38-win32.whl", hash = "sha256:43a1a476f870b953ad6de65e6f1dffa9a4f07d0a0bcd9b3ec81732f12a2d3261"},
-    {file = "opencv_contrib_python_headless-4.2.0.34-cp38-cp38-win_amd64.whl", hash = "sha256:65676218da9d03966e7623c6b4e4670c7300bf22ed884d5162563b31f61a274c"},
-]
 packaging = [
     {file = "packaging-21.3-py3-none-any.whl", hash = "sha256:ef103e05f519cdc783ae24ea4e2e0f508a9c99b2d4969652eed6a2e1ea5bd522"},
     {file = "packaging-21.3.tar.gz", hash = "sha256:dd47c42927d89ab911e606518907cc2d3a1f38bbd026385970643f9c5b8ecfeb"},
@@ -2133,6 +2137,7 @@ requests-oauthlib = [
     {file = "requests_oauthlib-1.3.1-py2.py3-none-any.whl", hash = "sha256:2577c501a2fb8d05a304c09d090d6e47c306fef15809d102b327cf8364bddab5"},
 ]
 rsa = []
+scikit-learn = []
 scipy = []
 seaborn = []
 send2trash = [
@@ -2160,6 +2165,10 @@ tensorboard-plugin-wit = [
     {file = "tensorboard_plugin_wit-1.8.1-py3-none-any.whl", hash = "sha256:ff26bdd583d155aa951ee3b152b3d0cffae8005dc697f72b44a8e8c2a77a8cbe"},
 ]
 terminado = []
+threadpoolctl = [
+    {file = "threadpoolctl-3.1.0-py3-none-any.whl", hash = "sha256:8b99adda265feb6773280df41eece7b2e6561b772d21ffd52e372f999024907b"},
+    {file = "threadpoolctl-3.1.0.tar.gz", hash = "sha256:a335baacfaa4400ae1f0d8e3a58d6674d2f8828e3716bb2802c44955ad391380"},
+]
 tinycss2 = []
 tomli = [
     {file = "tomli-2.0.1-py3-none-any.whl", hash = "sha256:939de3e7a6161af0c887ef91b7d41a53e7c5a1ca976325f429cb46ea9bc30ecc"},
