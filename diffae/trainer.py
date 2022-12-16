@@ -39,7 +39,9 @@ class Trainer:
         training_reproducibility_cudnn()
 
         self.log_interval = cfg['train']['log_interval']
+        self.save_interval = cfg['train']['save_interval']
         logger.info(f'Output a log for every {self.log_interval} iteration')
+        logger.info(f'Save checkpoint every {self.save_interval} epoch')
 
         self.optimizer = self.get_optimizer()
         self.criterion = SimpleLoss()
@@ -124,6 +126,9 @@ class Trainer:
         self.save_ckpt(name='last_ckpt.pth')
         epoch_elapsed_time = time() - self.epoch_start_time
         logger.info(f'Epoch {self.epoch + 1} done. ({epoch_elapsed_time:.1f} sec)')
+
+        if (self.epoch + 1) % self.save_interval == 0:
+            self.save_ckpt(name=f'epoch_{self.epoch + 1}_ckpt.pth')
 
     def before_iter(self):
         pass

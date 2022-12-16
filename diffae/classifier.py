@@ -121,7 +121,9 @@ class ClassifierTrainer:
         training_reproducibility_cudnn()
 
         self.log_interval = cfg['classifier']['train']['log_interval']
+        self.save_interval = cfg['classifier']['train']['save_interval']
         logger.info(f'Output a log for every {self.log_interval} iteration')
+        logger.info(f'Save checkpoint every {self.save_interval} epoch')
 
         self.optimizer = self.get_optimizer()
         self.criterion = self.get_criterion()
@@ -198,6 +200,9 @@ class ClassifierTrainer:
         self.save_ckpt('clf_last_ckpt.pth')
         epoch_elapsed_time = time() - self.epoch_start_time
         logger.info(f'Epoch {self.epoch + 1} done. ({epoch_elapsed_time:.1f} sec)')
+
+        if (self.epoch + 1) % self.save_interval == 0:
+            self.save_ckpt(name=f'clf_epoch_{self.epoch + 1}_ckpt.pth')
 
     def before_iter(self):
         pass

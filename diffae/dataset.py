@@ -44,7 +44,7 @@ class EmbeddingDataset(Dataset):
 
         style_embs = []
         targets = []
-        for batch in tqdm(image_loader, desc='Extracting features...'):
+        for _, batch in tqdm(enumerate(image_loader), total=len(image_loader), desc='Extracting features...'):
             image, target = batch
             image = image.to(self.device)
             style_emb = encoder(image)
@@ -188,7 +188,7 @@ class CelebAHQ(CelebA):
         else:
             target = None
 
-        return x, target.long
+        return x, target.long()
 
 
 def get_dataset(name, split, transform=None):

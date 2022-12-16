@@ -155,7 +155,10 @@ class Sampler:
         return result
 
     def encode_stochastic(self, x0, disable_tqdm=False):
-        """Get stochastic encoded tensor xT.
+        """
+        Get stochastic encoded tensor xT.
+        It is necessary to obtain stochastic subcode for high-quality reconstruction, but not when training.
+        See https://github.com/phizaz/diffae/issues/17 for more details.
         """
         batch_size = x0.shape[0]
 
@@ -179,3 +182,59 @@ class Sampler:
             )
 
         return xt
+
+    def interpolate(self, image_1, image_2, alpha, eta=0.0):
+        """Interpolation of 2 images.
+        """
+        self.model.eval()
+
+        x0_1 = image_1.unsqueeze(dim=0).to(self.device)
+        x0_2 = image_2.unsqueeze(dim=0).to(self.device)
+        batch_size = x0_1.shape[0]
+
+        xt_1 = self.encode_stochastic(x0_1)
+        xt_2 = self.encode_stochastic(x0_2)
+
+        style_emb_1 = self.model.encoder(x0_1)
+        style_emb_2 = self.model.encoder(x0_2)
+
+        xt = (1 - alpha) * xt_1 + alpha * xt_2
+        style_emb = (1 - alpha) * style_emb_1 + alpha * style_emb_2
+
+        x0_preds = []
+        xt_preds = []
+        for _t in tqdm(reversed(range(self.num_timesteps)), desc='decoding...', total=self.num_timesteps):
+            t = torch.ones(batch_size, dtype=torch.long, device=self.device) * _t
+            e = self.model.unet(xt, t, style_emb)
+
+            # Equation 12 of Denoising Diffusion Implicit Models
+            x0_t = (
+                torch.sqrt(1.0 / self.alphas_cumprod[t])[:, None, None, None] * xt
+                - torch.sqrt(1.0 / self.alphas_cumprod[t] - 1)[:, None, None, None] * e
+            ).clamp(-1, 1)
+            e = (
+                (torch.sqrt(1.0 / self.alphas_cumprod[t])[:, None, None, None] * xt - x0_t)
+                / (torch.sqrt(1.0 / self.alphas_cumprod[t] - 1)[:, None, None, None])
+            )
+            sigma = (
+                eta
+                * torch.sqrt((1 - self.alphas_cumprod_prev[t]) / (1 - self.alphas_cumprod[t]))
+                / torch.sqrt((1 - self.alphas_cumprod[t]) / self.alphas_cumprod_prev[t])
+            )
+            xt = (
+                torch.sqrt(self.alphas_cumprod_prev[t])[:, None, None, None] * x0_t
+                + torch.sqrt(1 - self.alphas_cumprod_prev[t] - sigma**2)[:, None, None, None] * e
+            )
+            xt = xt + torch.randn_like(x0_1) * sigma if _t != 0 else xt
+
+            x0_preds.append(x0_t[0])
+            xt_preds.append(xt[0])
+
+        result = {
+            'x0_preds': x0_preds,
+            'xt_preds': xt_preds,
+            'input_1': x0_1[0],
+            'input_2': x0_2[0],
+            'output': xt_preds[-1],
+        }
+        return result
