@@ -6,6 +6,8 @@ from loguru import logger
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('-o', '--output', type=str, required=True)
+    parser.add_argument('-mc', '--model_ckpt', type=str, default='last_ckpt.pth')
+    parser.add_argument('-cc', '--clf_ckpt', type=str, default='clf_last_ckpt.pth')
     args = parser.parse_args()
     return args
 
