@@ -45,9 +45,10 @@ model:
 train:
     epoch: 500
     fp16: False
-    grad_accum_steps: 32
+    grad_accum_steps: 1
     clip_grad_norm: 1.0
-    log_interval: 1000
+    log_interval: 500
+    save_interval: 100
     dataset:
         - name: Resize
           params:
@@ -62,7 +63,7 @@ train:
               mean: [0.5, 0.5, 0.5]
               std: [0.5, 0.5, 0.5]
     dataloader:
-        batch_size: 2
+        batch_size: 32
         shuffle: True
         num_workers: 4
         pin_memory: True
@@ -87,7 +88,7 @@ test:
               mean: [0.5, 0.5, 0.5]
               std: [0.5, 0.5, 0.5]
     dataloader:
-        batch_size: 8
+        batch_size: 32
         shuffle: False
         num_workers: 4
         pin_memory: True
@@ -98,11 +99,12 @@ classifier:
     train:
         epoch: 500
         fp16: False
-        grad_accum_steps: 32
+        grad_accum_steps: 1
         clip_grad_norm: 0
         log_interval: 1000
+        save_interval: 100
         dataloader:
-            batch_size: 2
+            batch_size: 32
             shuffle: True
             num_workers: 1
             pin_memory: True
@@ -114,3 +116,10 @@ classifier:
             params:
                 lr: 0.001
                 weight_decay: 0
+    test:
+        dataloader:
+        batch_size: 32
+        shuffle: false
+        num_workers: 4
+        pin_memory: true
+        drop_last: false

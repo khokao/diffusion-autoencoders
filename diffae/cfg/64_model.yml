@@ -48,6 +48,7 @@ train:
     grad_accum_steps: 1
     clip_grad_norm: 1.0
     log_interval: 100
+    save_interval: 100
     dataset:
         - name: Resize
           params:
@@ -101,6 +102,7 @@ classifier:
         grad_accum_steps: 1
         clip_grad_norm: 0
         log_interval: 500
+        save_interval: 100
         dataloader:
             batch_size: 128
             shuffle: True
@@ -114,3 +116,10 @@ classifier:
             params:
                 lr: 0.001
                 weight_decay: 0
+    test:
+        dataloader:
+        batch_size: 128
+        shuffle: false
+        num_workers: 4
+        pin_memory: true
+        drop_last: false
