@@ -15,6 +15,16 @@ from .utils import Meter, seed_everything, training_reproducibility_cudnn
 
 @torch.inference_mode()
 def evaluate_classifier(clf_model, cfg, test_dataset):
+    """Evaluation of multi-label classifications
+
+    Args:
+        clf_model (torch.nn.Module): Multi-label classifier module.
+        cfg (dict): A dict of config.
+        test_dataset (torch.utils.data.Dataset): Test dataset class.
+
+    Returns:
+        result (dict): A dict of accuracy and AUROC values per label.
+    """
     test_loader = DataLoader(test_dataset, **cfg['classifier']['test']['dataloader'])
 
     device = cfg['general']['device']
@@ -54,6 +64,8 @@ def evaluate_classifier(clf_model, cfg, test_dataset):
 
 
 class LinearClassifier(nn.Module):
+    """Linear classifier for multi-label classification.
+    """
     def __init__(self, cfg):
         super().__init__()
         self.cfg = cfg
@@ -68,6 +80,8 @@ class LinearClassifier(nn.Module):
         self.register_buffer('mean', torch.zeros(self.cfg['model']['network']['encoder']['emb_channels']))
 
     def set_norm_params(self, emb_dataset):
+        """Calculate normalization parameters
+        """
         embs = []
         for i in range(len(emb_dataset)):
             emb, _ = emb_dataset[i]
