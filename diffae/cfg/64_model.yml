@@ -43,7 +43,7 @@ model:
             max_beta: 0.999
 
 train:
-    epoch: 500
+    epoch: 300
     fp16: True
     grad_accum_steps: 1
     clip_grad_norm: 1.0
