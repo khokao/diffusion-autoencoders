@@ -47,10 +47,11 @@ class DiffusionAutoEncodersInterface:
             log_path = self.output_dir / f'{self.mode}.txt'
             logger.add(log_path, mode='w')
 
+        model_ckpt_path = self.output_dir / 'ckpt' / args['model_ckpt'] if 'model_ckpt' in args else None
         model_ckpt_path = None if self.mode == 'train' else self.output_dir / 'ckpt' / args['model_ckpt']
         self.model = self._init_model(model_ckpt_path)
 
-        clf_ckpt_path = None if self.mode != 'clf_test' else self.output_dir / 'ckpt' / args['clf_ckpt']
+        clf_ckpt_path = self.output_dir / 'ckpt' / args['clf_ckpt'] if 'clf_ckpt' in args else None
         self.clf_model = self._init_clf_model(clf_ckpt_path)
 
         if self.mode in {'test', 'infer'}:
@@ -179,7 +180,7 @@ class DiffusionAutoEncodersInterface:
             json.dump(result, fp, indent=4, sort_keys=False)
 
     @torch.inference_mode()
-    def infer(self, image, style_emb=None):
+    def infer(self, image, xt=None, style_emb=None):
         """Autoencode a single image.
 
         Args:
@@ -196,7 +197,7 @@ class DiffusionAutoEncodersInterface:
         """
         assert self.mode == 'infer'
         image = self.transforms(image)
-        result = self.sampler.sample_one_image(image, style_emb)
+        result = self.sampler.sample_one_image(image, xt=xt, style_emb=style_emb)
 
         # Unnormalize and to numpy.ndarray
         for k, v in result.items():
@@ -216,7 +217,7 @@ class DiffusionAutoEncodersInterface:
         Args:
             image (PIL Image): A single PIL Image.
             target_id (int): Target attribute id.
-            s (Union[int, float]): Attribute manipulation parameter.
+            s (float or List[float]): Attribute manipulation parameter(s).
 
         Returns:
             result (dict): A result of autoencoding which has the following keys,
@@ -227,49 +228,73 @@ class DiffusionAutoEncodersInterface:
         """
         assert self.mode == 'infer'
         device = self.cfg['general']['device']
+        if isinstance(s, (int, float)):
+            s = [s]
 
         clf_ckpt_path = self.output_dir / 'ckpt/clf_last_ckpt.pth'
         self.clf_model = self._init_clf_model(clf_ckpt_path)
         self.clf_model.to(device)
-
         direction = torch.nn.functional.normalize(self.clf_model.classifier.weight[target_id][None, :], dim=1)
 
-        style_emb = self.model.encoder(self.transforms(image).unsqueeze(dim=0).to(device))
+        x0 = self.transforms(image).unsqueeze(dim=0).to(device)
+        xt = self.sampler.encode_stochastic(x0)
+        style_emb = self.model.encoder(x0)
         style_emb = self.clf_model.normalize(style_emb)
-        style_emb += s * math.sqrt(style_emb.shape[1]) * direction
-        style_emb = self.clf_model.unnormalize(style_emb)
 
-        result = self.infer(image, style_emb)
+        results = []
+        for i in range(len(s)):
+            transferred_style_emb = style_emb + s[i] * math.sqrt(style_emb.shape[1]) * direction
+            transferred_style_emb = self.clf_model.unnormalize(transferred_style_emb)
 
-        return result
+            result = self.infer(image, xt=xt, style_emb=transferred_style_emb)
+            results.append(result)
+
+        return results
 
     @torch.inference_mode()
-    def infer_interpolate(self, image_1, image_2, alpha):
+    def infer_interpolate(self, image_1, image_2, alphas):
         """Interpolation of 2 images.
 
         Args:
             image_1, image_2 (PIL Image): A single PIL Image.
-            alpha (Union[int, float]): Interpolation parameter.
+            alphas (float or List[float]): Interpolation parameter(s).
 
         Returns:
-            result (dict): A result of autoencoding which has the following keys,
-                input (numpy.ndarray): A input image array.
+            result (List[dict]): A List of result which has the following keys,
                 output (numpy.ndarray): A output (autoencoded) image array.
                 x0_preds (List[numpy.ndarray]): A list of predicted x0 per timestep.
                 xt_preds (List[numpy.ndarray]): A list of predicted xt per timestep.
         """
         assert self.mode == 'infer'
+        device = self.cfg['general']['device']
+        if isinstance(alphas, (int, float)):
+            alphas = [alphas]
+
         image_1 = self.transforms(image_1)
         image_2 = self.transforms(image_2)
-        result = self.sampler.interpolate(image_1, image_2, alpha)
 
-        # Unnormalize and to numpy.ndarray
-        for k, v in result.items():
-            if isinstance(v, list):
-                for i, x in enumerate(result[k]):
-                    assert torch.is_tensor(x)
-                    result[k][i] = self.unnormalize(x).permute(1, 2, 0).cpu().detach().numpy()
-            elif torch.is_tensor(v):
-                result[k] = self.unnormalize(v).permute(1, 2, 0).cpu().detach().numpy()
+        x0_1 = image_1.unsqueeze(dim=0).to(device)
+        x0_2 = image_2.unsqueeze(dim=0).to(device)
 
-        return result
+        xt_1 = self.sampler.encode_stochastic(x0_1)
+        xt_2 = self.sampler.encode_stochastic(x0_2)
+
+        style_emb_1 = self.model.encoder(x0_1)
+        style_emb_2 = self.model.encoder(x0_2)
+
+        results = []
+        for alpha in alphas:
+            result = self.sampler.interpolate(xt_1, xt_2, style_emb_1, style_emb_2, alpha)
+
+            # Unnormalize and to numpy.ndarray
+            for k, v in result.items():
+                if isinstance(v, list):
+                    for i, x in enumerate(result[k]):
+                        assert torch.is_tensor(x)
+                        result[k][i] = self.unnormalize(x).permute(1, 2, 0).cpu().detach().numpy()
+                elif torch.is_tensor(v):
+                    result[k] = self.unnormalize(v).permute(1, 2, 0).cpu().detach().numpy()
+
+            results.append(result)
+
+        return results

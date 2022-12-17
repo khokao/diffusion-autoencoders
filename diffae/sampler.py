@@ -22,7 +22,11 @@ Link:
           blob/865f1926ce0d994e4a8dc2b5b250d57f519cadc1/diffusion/base.py#L633-L714
         - https://github.com/phizaz/diffae/
           blob/865f1926ce0d994e4a8dc2b5b250d57f519cadc1/diffusion/base.py#L274-L368
+    - [interpolate]
+        - https://github.com/phizaz/diffae/blob/master/interpolate.ipynb
 """
+import warnings
+
 import lpips
 import torch
 from torch.utils.data import DataLoader
@@ -51,7 +55,9 @@ class Sampler:
         self.alphas_cumprod_prev = torch.cat([torch.ones(1, device=self.device), self.alphas_cumprod[:-1]], dim=0)
         self.alphas_cumprod_next = torch.cat([self.alphas_cumprod[1:], torch.zeros(1, device=self.device)], dim=0)
 
-        self.lpips_fn_alex = lpips.LPIPS(net='alex').to(self.device)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            self.lpips_fn_alex = lpips.LPIPS(net='alex', verbose=False).to(self.device)
 
     def sample_testdata(self, test_dataset, eta=0.0):
         """Autoencode test data and calculate evaluation metrics.
@@ -105,7 +111,7 @@ class Sampler:
 
         return scores
 
-    def sample_one_image(self, image, style_emb=None, eta=0.0):
+    def sample_one_image(self, image, xt=None, style_emb=None, eta=0.0):
         """Get the result of autoencoding a single image
         """
         self.model.eval()
@@ -113,7 +119,8 @@ class Sampler:
         x0 = image.unsqueeze(dim=0).to(self.device)
         batch_size = x0.shape[0]
 
-        xt = self.encode_stochastic(x0)
+        if xt is None:
+            xt = self.encode_stochastic(x0)
         if style_emb is None:
             style_emb = self.model.encoder(x0)
 
@@ -183,22 +190,24 @@ class Sampler:
 
         return xt
 
-    def interpolate(self, image_1, image_2, alpha, eta=0.0):
+    def interpolate(self, xt_1, xt_2, style_emb_1, style_emb_2, alpha, eta=0.0):
         """Interpolation of 2 images.
         """
+        def cos(a, b):
+            a = a.view(-1)
+            b = b.view(-1)
+            a = torch.nn.functional.normalize(a, dim=0)
+            b = torch.nn.functional.normalize(b, dim=0)
+            return (a * b).sum()
+        theta = torch.arccos(cos(xt_1, xt_2))
+
         self.model.eval()
+        batch_size = xt_1.shape[0]
 
-        x0_1 = image_1.unsqueeze(dim=0).to(self.device)
-        x0_2 = image_2.unsqueeze(dim=0).to(self.device)
-        batch_size = x0_1.shape[0]
-
-        xt_1 = self.encode_stochastic(x0_1)
-        xt_2 = self.encode_stochastic(x0_2)
-
-        style_emb_1 = self.model.encoder(x0_1)
-        style_emb_2 = self.model.encoder(x0_2)
-
-        xt = (1 - alpha) * xt_1 + alpha * xt_2
+        xt = (
+            torch.sin((1 - alpha) * theta) * xt_1.flatten() + torch.sin(alpha * theta) * xt_2.flatten()
+        ) / torch.sin(theta)
+        xt = xt.view(-1, *xt_1.shape[1:])
         style_emb = (1 - alpha) * style_emb_1 + alpha * style_emb_2
 
         x0_preds = []
@@ -225,7 +234,7 @@ class Sampler:
                 torch.sqrt(self.alphas_cumprod_prev[t])[:, None, None, None] * x0_t
                 + torch.sqrt(1 - self.alphas_cumprod_prev[t] - sigma**2)[:, None, None, None] * e
             )
-            xt = xt + torch.randn_like(x0_1) * sigma if _t != 0 else xt
+            xt = xt + torch.randn_like(xt_1) * sigma if _t != 0 else xt
 
             x0_preds.append(x0_t[0])
             xt_preds.append(xt[0])
@@ -233,8 +242,6 @@ class Sampler:
         result = {
             'x0_preds': x0_preds,
             'xt_preds': xt_preds,
-            'input_1': x0_1[0],
-            'input_2': x0_2[0],
             'output': xt_preds[-1],
         }
         return result
