@@ -134,7 +134,7 @@ class DiffusionAutoEncodersInterface:
         if self.mode == 'train':
             self.dataset = get_dataset(name=data_name, split=self.mode, transform=self.transforms)
         elif self.mode == 'test':
-            self.dataset = get_dataset(name=data_name, split=self.mode, transforms=self.transforms)
+            self.dataset = get_dataset(name=data_name, split=self.mode, transform=self.transforms)
         elif self.mode == 'clf_train':
             image_dataset = get_dataset(name=data_name, split='train', transform=self.transforms)
             image_loader = DataLoader(image_dataset, **self.cfg['classifier']['train']['dataloader'])

@@ -70,7 +70,7 @@ class Sampler:
             'mse': [],
         }
         self.model.eval()
-        for iter, batch in tqdm(enumerate(test_loader)):
+        for iter, batch in tqdm(enumerate(test_loader), total=len(test_loader)):
             x0, _ = batch
             x0 = x0.to(self.device)
             batch_size = x0.shape[0]
