@@ -1,5 +1,6 @@
 # Diffusion Autoencoders
 ![demo_diffae](assets/demo.gif)
+
 Unofficial implementation of [Diffusion Autoencoders](https://diff-ae.github.io/).<br>
 The official implementation is [here](https://github.com/phizaz/diffae).
 
