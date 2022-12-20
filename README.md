@@ -1,4 +1,5 @@
 # Diffusion Autoencoders
+![demo_diffae](assets/demo.gif)
 Unofficial implementation of [Diffusion Autoencoders](https://diff-ae.github.io/).<br>
 The official implementation is [here](https://github.com/phizaz/diffae).
 
@@ -71,10 +72,10 @@ poetry run clf_test \
 ```
 
 # :books: Example Notebooks
-You can view the minimal working notebooks [here]().
-- [demo_autoencode.ipynb]()
-- [demo_attribute_manipulation.ipynb]()
-- [demo_interpolation.ipynb]()
+You can view the minimal working notebooks [here](demo).
+- [autoencode.ipynb](demo/autoencode.ipynb)
+- [manipulation.ipynb](demo/manipulation.ipynb)
+- [interpolation.ipynb](demo/interpolation.ipynb)
 
 ---
 
