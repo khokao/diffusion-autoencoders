@@ -1,19 +1,18 @@
 # Diffusion Autoencoders
 ![demo_diffae](assets/demo.gif)
 
-Unofficial implementation of [Diffusion Autoencoders](https://diff-ae.github.io/).<br>
-The official implementation is [here](https://github.com/phizaz/diffae).
+This is an unofficial implementation of [Diffusion Autoencoders](https://diff-ae.github.io/). You can find the official implementation [here](https://github.com/phizaz/diffae).
 
 # :hammer_and_wrench: Setup
-If you are using [poetry](https://github.com/python-poetry/poetry), run the following command.
+If you are using [poetry](https://github.com/python-poetry/poetry), you can install the required packages by running the following command:
 ```bash
 poetry install
 ```
 
-See `pyproject.toml` for more details on required packages.
+For more details on the required packages, refer to `pyproject.toml`.
 
 # :rocket: Run
-## Diff-AE training
+## Training Diff-AE
 You can train Diff-AE on [CelebA](https://mmlab.ie.cuhk.edu.hk/projects/CelebA.html) or [CelebA-HQ](http://mmlab.ie.cuhk.edu.hk/projects/CelebA/CelebAMask_HQ.html) datasets.<br>
 **There is no need to download the datasets manually**; they are automatically downloaded when you run.
 
@@ -28,14 +27,14 @@ poetry run diffae_train \
     --expn=$EXPN
 ```
 
-You can change the settings before training. If you want to make your own settings, modify `diffae/cfg/{IMAGE_SIZE}_model.yml` according to your GPU specs. :gear:
+You can modify the settings before training. If you wish to create custom settings, modify the `diffae/cfg/{IMAGE_SIZE}_model.yml` file according to your GPU specs. :gear:
 
-The training results are saved under `output/{EXPN}`. If the --expn argument is not given, the directory name is assigned according to the time of day.
+The training results will be saved in `output/{EXPN}`. If the --expn argument is not provided, the directory name will be generated based on the current time.
 
-Latent DDIM is not implemented as I am not interested in unconditional image synthesis by Diff-AE.
+Note that Latent DDIM is not implemented as unconditional image synthesis by Diff-AE is not the focus of this repo.
 
-## Diff-AE evaluation
-You can evaluate the model by calculating MSE and [LPIPS](https://richzhang.github.io/PerceptualSimilarity/).
+## Evaluating Diff-AE
+You can evaluate the trained model by calculating its MSE and [LPIPS](https://richzhang.github.io/PerceptualSimilarity/).
 
 ```bash
 export PATH_TO_OUTPUT_DIR="output/hoge"
@@ -46,8 +45,8 @@ poetry run diffae_test \
     --model_ckpt=$MODEL_CKPT
 ```
 
-## Classifier Training
-You can train classifier for attribute manipulation.
+## Training the Classifier
+You can also train a classifier for attribute manipulation.
 
 ```bash
 export PATH_TO_OUTPUT_DIR="output/hoge"
@@ -58,8 +57,8 @@ poetry run clf_train \
     --model_ckpt=$MODEL_CKPT
 ```
 
-## Classifier evaluation
-You can evaluate the classifier by calculating accuracy and AUROC.
+## Evaluating the Classifier
+The classifier can be evaluated by calculating its accuracy and AUROC.
 
 ```bash
 export PATH_TO_OUTPUT_DIR="output/hoge"
@@ -73,11 +72,11 @@ poetry run clf_test \
 ```
 
 # :books: Example Notebooks
-You can view the minimal working notebooks [here](demo).
+You can check out the minimal working examples in the notebooks found [here](demo).
 - [autoencode.ipynb](demo/autoencode.ipynb)
 - [manipulation.ipynb](demo/manipulation.ipynb)
 - [interpolation.ipynb](demo/interpolation.ipynb)
 
 ---
 
-If this repo is helpful, please give me a star :star:
+If you find this repository helpful, please consider giving a star :star:!
