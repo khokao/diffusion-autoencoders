@@ -228,7 +228,7 @@ class Sampler:
             sigma = (
                 eta
                 * torch.sqrt((1 - self.alphas_cumprod_prev[t]) / (1 - self.alphas_cumprod[t]))
-                / torch.sqrt((1 - self.alphas_cumprod[t]) / self.alphas_cumprod_prev[t])
+                * torch.sqrt(1 - self.alphas_cumprod[t] / self.alphas_cumprod_prev[t])
             )
             xt = (
                 torch.sqrt(self.alphas_cumprod_prev[t])[:, None, None, None] * x0_t
